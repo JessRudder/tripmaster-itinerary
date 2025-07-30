@@ -1,6 +1,7 @@
 import { DayActivity } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { PhotoGallery } from '@/components/PhotoGallery'
 import { Clock, DollarSign, Plus } from '@phosphor-icons/react'
 
 interface DayCardProps {
@@ -56,6 +57,11 @@ export function DayCard({ activity }: DayCardProps) {
             {activity.description}
           </p>
         </div>
+
+        {/* Photo Gallery */}
+        {activity.photos && activity.photos.length > 0 && (
+          <PhotoGallery photos={activity.photos} />
+        )}
         
         {activity.addOns && activity.addOns.length > 0 && (
           <div>

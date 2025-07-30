@@ -1,4 +1,5 @@
 import { TripFormData, TripItinerary, DayActivity } from './types'
+import { generatePhotosForActivity, generateDestinationHeroPhoto } from './photo-service'
 
 export async function generateItinerary(formData: TripFormData): Promise<TripItinerary> {
   const childrenText = formData.hasChildren ? "family-friendly activities suitable for children" : "activities for adults"
@@ -32,14 +33,30 @@ Make activities realistic, specific to the destination, and well-sequenced. Ensu
     const response = await spark.llm(prompt, "gpt-4o", true)
     const parsed = JSON.parse(response)
     
+    // Generate photos for each activity
+    const activitiesWithPhotos = await Promise.all(
+      parsed.activities.map(async (activity: DayActivity) => {
+        const photos = await generatePhotosForActivity(
+          formData.destination,
+          activity.mainActivity,
+          formData.activityType
+        )
+        return {
+          ...activity,
+          photos
+        }
+      })
+    )
+    
     const itinerary: TripItinerary = {
       id: `trip-${Date.now()}`,
       destination: formData.destination,
       days: formData.days,
       hasChildren: formData.hasChildren,
       activityType: formData.activityType,
-      activities: parsed.activities,
-      createdAt: new Date().toISOString()
+      activities: activitiesWithPhotos,
+      createdAt: new Date().toISOString(),
+      heroPhoto: generateDestinationHeroPhoto(formData.destination)
     }
     
     return itinerary

@@ -24,6 +24,28 @@ const activityTypeLabels = {
 export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerating }: ItineraryDisplayProps) {
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
+      {/* Hero Photo Section */}
+      {itinerary.heroPhoto && (
+        <Card className="overflow-hidden">
+          <div className="relative h-64 md:h-80">
+            <img
+              src={itinerary.heroPhoto.url}
+              alt={itinerary.heroPhoto.alt}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            <div className="absolute bottom-6 left-6 text-white">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                {itinerary.destination}
+              </h1>
+              <p className="text-lg opacity-90">
+                {itinerary.heroPhoto.caption}
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

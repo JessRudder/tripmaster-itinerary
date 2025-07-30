@@ -13,6 +13,12 @@ export type ActivityType =
   | 'nature'
   | 'urban'
 
+export interface PhotoData {
+  url: string
+  alt: string
+  caption?: string
+}
+
 export interface DayActivity {
   day: number
   mainActivity: string
@@ -20,6 +26,7 @@ export interface DayActivity {
   addOns: string[]
   estimatedCost?: string
   timeOfDay?: 'morning' | 'afternoon' | 'evening' | 'full-day'
+  photos?: PhotoData[]
 }
 
 export interface TripItinerary {
@@ -30,4 +37,5 @@ export interface TripItinerary {
   activityType: ActivityType
   activities: DayActivity[]
   createdAt: string
+  heroPhoto?: PhotoData
 }
