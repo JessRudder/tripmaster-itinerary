@@ -43,6 +43,13 @@ export interface DayActivity {
   weather?: WeatherData
 }
 
+export interface PackingItem {
+  item: string
+  category: 'clothing' | 'gear' | 'accessories' | 'documents' | 'personal' | 'electronics'
+  priority: 'essential' | 'recommended' | 'optional'
+  reason?: string
+}
+
 export interface TripItinerary {
   id: string
   destination: string
@@ -55,4 +62,5 @@ export interface TripItinerary {
   endDate?: string
   heroPhoto?: PhotoData
   weather?: WeatherData
+  packingList?: PackingItem[]
 }

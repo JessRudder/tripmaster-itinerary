@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { TripItinerary } from '@/lib/types'
 import { DayCard } from './DayCard'
 import { WeatherCard } from './WeatherCard'
+import { PackingSuggestions } from './PackingSuggestions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -161,6 +162,11 @@ export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerati
           )}
         </CardHeader>
       </Card>
+
+      {/* Packing Suggestions - only show if available */}
+      {itinerary.packingList && itinerary.packingList.length > 0 && (
+        <PackingSuggestions packingList={itinerary.packingList} />
+      )}
 
       <div className="space-y-6">
         {/* Day Navigation Header */}
