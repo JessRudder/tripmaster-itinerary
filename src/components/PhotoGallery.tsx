@@ -150,10 +150,17 @@ export function PhotoGallery({ photos, className = '' }: PhotoGalleryProps) {
                   }}
                 />
                 
-                {/* Caption */}
-                {photos[selectedPhoto].caption && (
+                {/* Caption and Photographer Credit */}
+                {(photos[selectedPhoto].caption || photos[selectedPhoto].photographer) && (
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg text-sm text-center max-w-md">
-                    {photos[selectedPhoto].caption}
+                    {photos[selectedPhoto].caption && (
+                      <div className="mb-1">{photos[selectedPhoto].caption}</div>
+                    )}
+                    {photos[selectedPhoto].photographer && (
+                      <div className="text-xs text-white/80">
+                        Photo by {photos[selectedPhoto].photographer} on Unsplash
+                      </div>
+                    )}
                   </div>
                 )}
 

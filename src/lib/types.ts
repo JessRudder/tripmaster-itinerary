@@ -17,6 +17,7 @@ export interface PhotoData {
   url: string
   alt: string
   caption?: string
+  photographer?: string
 }
 
 export interface DayActivity {

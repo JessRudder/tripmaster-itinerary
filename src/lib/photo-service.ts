@@ -15,30 +15,94 @@ import { PhotoData } from './types'
  */
 
 const UNSPLASH_BASE_URL = 'https://api.unsplash.com'
-const UNSPLASH_ACCESS_KEY = 'YOUR_UNSPLASH_ACCESS_KEY' // This would be set in environment variables in production
-
-// For demo purposes, we'll use Unsplash's source URLs which work without API keys
-// In production, you'd use the full API for better search and metadata
+const UNSPLASH_ACCESS_KEY = 'SjGt-UdmnjqrtfnRUf3TObvDQAv5ochEghww3C_KYRc'
 
 /**
- * Generates curated photo URLs using Unsplash Source API (works without API key)
- * This approach provides real, location-specific photos for common destinations
+ * Interface for Unsplash API photo response
  */
-function generateUnsplashSourcePhotos(searchTerm: string, count: number = 3): PhotoData[] {
-  const baseUrl = 'https://source.unsplash.com/800x600'
-  const photos: PhotoData[] = []
-  
-  // Generate multiple photos with slight variations to get different images
-  for (let i = 0; i < count; i++) {
-    const seed = hashString(searchTerm + i)
-    photos.push({
-      url: `${baseUrl}/?${encodeURIComponent(searchTerm)}&sig=${seed}`,
-      alt: `${searchTerm}`,
-      caption: searchTerm
-    })
+interface UnsplashPhoto {
+  id: string
+  urls: {
+    regular: string
+    small: string
+    thumb: string
+  }
+  alt_description: string | null
+  description: string | null
+  user: {
+    name: string
+  }
+  location?: {
+    name?: string
+    city?: string
+    country?: string
+  }
+}
+
+/**
+ * Interface for Unsplash API search response
+ */
+interface UnsplashSearchResponse {
+  total: number
+  total_pages: number
+  results: UnsplashPhoto[]
+}
+
+/**
+ * Searches for photos using the official Unsplash API
+ */
+async function searchUnsplashPhotos(searchTerm: string, count: number = 3): Promise<PhotoData[]> {
+  try {
+    const response = await fetch(
+      `${UNSPLASH_BASE_URL}/search/photos?query=${encodeURIComponent(searchTerm)}&per_page=${count}&orientation=landscape&content_filter=high`,
+      {
+        headers: {
+          'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`,
+          'Accept-Version': 'v1'
+        }
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Unsplash API error: ${response.status}`)
+    }
+
+    const data: UnsplashSearchResponse = await response.json()
+    
+    return data.results.map((photo: UnsplashPhoto) => ({
+      url: photo.urls.regular,
+      alt: photo.alt_description || photo.description || searchTerm,
+      caption: generateContextualCaption(photo, searchTerm),
+      photographer: photo.user.name
+    }))
+    
+  } catch (error) {
+    console.warn(`Failed to fetch photos from Unsplash for "${searchTerm}":`, error)
+    return []
+  }
+}
+
+/**
+ * Generates contextual captions for photos
+ */
+function generateContextualCaption(photo: UnsplashPhoto, searchTerm: string): string {
+  if (photo.description) {
+    return photo.description
   }
   
-  return photos
+  if (photo.alt_description) {
+    return photo.alt_description
+  }
+  
+  if (photo.location?.name) {
+    return photo.location.name
+  }
+  
+  if (photo.location?.city) {
+    return `${photo.location.city}${photo.location.country ? `, ${photo.location.country}` : ''}`
+  }
+  
+  return searchTerm
 }
 
 /**
@@ -83,11 +147,20 @@ Respond with JSON:
       return []
     }
 
-    // Use the first search term to generate photos
+    // Use the first search term to search for photos
     const primarySearchTerm = searchData.searchTerms[0]
     
-    // Generate photos using Unsplash Source API
-    const photos = generateUnsplashSourcePhotos(primarySearchTerm, 3)
+    // Search for photos using Unsplash API
+    const photos = await searchUnsplashPhotos(primarySearchTerm, 3)
+    
+    if (photos.length === 0 && searchData.searchTerms.length > 1) {
+      // Try the second search term if the first didn't return results
+      const secondaryPhotos = await searchUnsplashPhotos(searchData.searchTerms[1], 3)
+      if (secondaryPhotos.length > 0) {
+        console.log(`Generated ${secondaryPhotos.length} photos for secondary term: ${searchData.searchTerms[1]}`)
+        return secondaryPhotos
+      }
+    }
     
     console.log(`Generated ${photos.length} photos for: ${primarySearchTerm}`)
     return photos
@@ -99,41 +172,7 @@ Respond with JSON:
 }
 
 /**
- * Simple string hash function to generate consistent seeds
- */
-function hashString(str: string): string {
-  let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash // Convert to 32bit integer
-  }
-  return Math.abs(hash).toString()
-}
-
-/**
- * Generates contextual captions for photos based on activity and destination
- */
-function generateContextualCaption(destination: string, activity: string, searchTerm: string): string {
-  const captions = [
-    `${searchTerm} in ${destination}`,
-    `Experience ${activity}`,
-    `Discover ${destination}`,
-    `${searchTerm} - ${destination}`
-  ]
-  
-  // Pick a caption based on content
-  if (searchTerm.toLowerCase().includes(destination.toLowerCase())) {
-    return `Experience ${activity}`
-  } else if (searchTerm.toLowerCase().includes(activity.toLowerCase())) {
-    return `${searchTerm} in ${destination}`
-  } else {
-    return `${searchTerm} - ${destination}`
-  }
-}
-
-/**
- * Generates a hero photo for the destination using Unsplash Source API
+ * Generates a hero photo for the destination using Unsplash API
  */
 export async function generateDestinationHeroPhoto(destination: string): Promise<PhotoData | null> {
   try {
@@ -169,10 +208,11 @@ Respond with JSON:
       return null
     }
 
-    // Generate hero photo using Unsplash Source API
-    const heroPhoto = generateUnsplashSourcePhotos(heroData.searchTerm, 1)[0]
+    // Search for hero photo using Unsplash API
+    const heroPhotos = await searchUnsplashPhotos(heroData.searchTerm, 1)
     
-    if (heroPhoto) {
+    if (heroPhotos.length > 0) {
+      const heroPhoto = heroPhotos[0]
       console.log(`Generated hero photo for: ${heroData.searchTerm}`)
       return {
         ...heroPhoto,
