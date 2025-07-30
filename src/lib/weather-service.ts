@@ -7,7 +7,7 @@ import { WeatherData } from './types'
 
 // OpenWeatherMap API configuration
 // To use real weather data, sign up at https://openweathermap.org/api and replace with your API key
-const WEATHER_API_KEY = 'YOUR_OPENWEATHERMAP_API_KEY' // Replace with your actual API key
+const WEATHER_API_KEY = '2d169bb782eb8385262b1680e151f9dc'
 const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5'
 
 // Helper to check if API key is configured
