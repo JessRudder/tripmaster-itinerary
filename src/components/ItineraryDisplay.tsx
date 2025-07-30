@@ -1,10 +1,11 @@
+import { useState, useEffect } from 'react'
 import { TripItinerary } from '@/lib/types'
 import { DayCard } from './DayCard'
 import { WeatherCard } from './WeatherCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, MapPin, Calendar, Users, Sparkle } from '@phosphor-icons/react'
+import { ArrowLeft, MapPin, Calendar, Users, Sparkle, CaretLeft, CaretRight } from '@phosphor-icons/react'
 
 interface ItineraryDisplayProps {
   itinerary: TripItinerary
@@ -23,6 +24,32 @@ const activityTypeLabels = {
 }
 
 export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerating }: ItineraryDisplayProps) {
+  const [currentDayIndex, setCurrentDayIndex] = useState(0)
+  
+  const handlePreviousDay = () => {
+    setCurrentDayIndex(prev => prev > 0 ? prev - 1 : itinerary.activities.length - 1)
+  }
+  
+  const handleNextDay = () => {
+    setCurrentDayIndex(prev => prev < itinerary.activities.length - 1 ? prev + 1 : 0)
+  }
+  
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        handlePreviousDay()
+      } else if (event.key === 'ArrowRight') {
+        handleNextDay()
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+  
+  const currentActivity = itinerary.activities[currentDayIndex]
+  
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Hero Photo Section - only show if hero photo exists */}
@@ -115,10 +142,70 @@ export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerati
         </CardHeader>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {itinerary.activities.map((activity) => (
-          <DayCard key={activity.day} activity={activity} />
-        ))}
+      <div className="space-y-6">
+        {/* Day Navigation Header */}
+        <Card>
+          <CardContent className="py-6">
+            <div className="flex items-center justify-between">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousDay}
+                className="flex items-center gap-2"
+              >
+                <CaretLeft size={16} />
+                Previous Day
+              </Button>
+              
+              <div className="text-center">
+                <h2 className="text-xl font-semibold">
+                  Day {currentActivity.day} of {itinerary.activities.length}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {currentActivity.title}
+                </p>
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextDay}
+                className="flex items-center gap-2"
+              >
+                Next Day
+                <CaretRight size={16} />
+              </Button>
+            </div>
+            
+            {/* Day indicators */}
+            <div className="flex justify-center gap-2 mt-4">
+              {itinerary.activities.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentDayIndex(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    index === currentDayIndex 
+                      ? 'bg-primary' 
+                      : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                  }`}
+                  aria-label={`Go to day ${index + 1}`}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Current Day Card */}
+        <div className="flex justify-center">
+          <div className="w-full max-w-2xl">
+            <DayCard activity={currentActivity} />
+            
+            {/* Navigation hint */}
+            <p className="text-xs text-muted-foreground text-center mt-4">
+              Use arrow keys ← → or buttons above to navigate between days
+            </p>
+          </div>
+        </div>
       </div>
       
       <Card className="bg-muted/30">
