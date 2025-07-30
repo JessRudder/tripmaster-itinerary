@@ -20,6 +20,15 @@ export interface PhotoData {
   photographer?: string
 }
 
+export interface WeatherData {
+  temperature: number
+  condition: string
+  description: string
+  humidity: number
+  windSpeed: number
+  icon: string
+}
+
 export interface DayActivity {
   day: number
   mainActivity: string
@@ -28,6 +37,7 @@ export interface DayActivity {
   estimatedCost?: string
   timeOfDay?: 'morning' | 'afternoon' | 'evening' | 'full-day'
   photos?: PhotoData[]
+  weather?: WeatherData
 }
 
 export interface TripItinerary {
@@ -39,4 +49,5 @@ export interface TripItinerary {
   activities: DayActivity[]
   createdAt: string
   heroPhoto?: PhotoData
+  weather?: WeatherData
 }

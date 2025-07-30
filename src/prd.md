@@ -48,6 +48,11 @@
 - **Purpose**: Provides authentic, high-quality travel photography that enhances trip visualization and inspiration
 - **Success Criteria**: Photos are location-specific, high-quality, and only shown when relevant to the destination/activity
 
+### Location-Based Weather Information
+- **Functionality**: Real-time weather data for destinations with detailed conditions, temperature, humidity, and wind information
+- **Purpose**: Helps users pack appropriately and set realistic expectations for outdoor activities
+- **Success Criteria**: Weather information is accurate, visually appealing, and prominently displayed without overwhelming the itinerary
+
 ### Smart Photo Filtering
 - **Functionality**: AI analyzes each activity to determine if relevant photos exist before displaying galleries  
 - **Purpose**: Ensures users only see meaningful imagery that enhances their planning

@@ -1,5 +1,6 @@
 import { TripFormData, TripItinerary, DayActivity } from './types'
 import { generatePhotosForActivity, generateDestinationHeroPhoto } from './photo-service'
+import { fetchWeatherData } from './weather-service'
 
 export async function generateItinerary(formData: TripFormData): Promise<TripItinerary> {
   const childrenText = formData.hasChildren ? "family-friendly activities suitable for children" : "activities for adults"
@@ -33,6 +34,9 @@ Make activities realistic, specific to the destination, and well-sequenced. Ensu
     const response = await spark.llm(prompt, "gpt-4o", true)
     const parsed = JSON.parse(response)
     
+    // Fetch weather data for the destination
+    const weatherData = await fetchWeatherData(formData.destination)
+    
     // Generate photos for each activity
     const activitiesWithPhotos = await Promise.all(
       parsed.activities.map(async (activity: DayActivity) => {
@@ -43,7 +47,8 @@ Make activities realistic, specific to the destination, and well-sequenced. Ensu
         )
         return {
           ...activity,
-          photos
+          photos,
+          weather: weatherData // Add weather to each day
         }
       })
     )
@@ -59,6 +64,7 @@ Make activities realistic, specific to the destination, and well-sequenced. Ensu
       activityType: formData.activityType,
       activities: activitiesWithPhotos,
       createdAt: new Date().toISOString(),
+      weather: weatherData, // Add weather to the main itinerary
       ...(heroPhoto && { heroPhoto })
     }
     

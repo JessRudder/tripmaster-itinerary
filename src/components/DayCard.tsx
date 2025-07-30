@@ -2,6 +2,7 @@ import { DayActivity } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { PhotoGallery } from '@/components/PhotoGallery'
+import { WeatherCard } from '@/components/WeatherCard'
 import { Clock, DollarSign, Plus } from '@phosphor-icons/react'
 
 interface DayCardProps {
@@ -57,6 +58,14 @@ export function DayCard({ activity }: DayCardProps) {
             {activity.description}
           </p>
         </div>
+
+        {/* Weather Information */}
+        {activity.weather && (
+          <div>
+            <h4 className="text-sm font-medium mb-2 text-foreground">Weather</h4>
+            <WeatherCard weather={activity.weather} compact />
+          </div>
+        )}
 
         {/* Photo Gallery */}
         {activity.photos && activity.photos.length > 0 && (

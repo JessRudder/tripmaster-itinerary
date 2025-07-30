@@ -1,5 +1,6 @@
 import { TripItinerary } from '@/lib/types'
 import { DayCard } from './DayCard'
+import { WeatherCard } from './WeatherCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -97,6 +98,14 @@ export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerati
               {activityTypeLabels[itinerary.activityType]}
             </Badge>
           </div>
+          
+          {/* Weather Information */}
+          {itinerary.weather && (
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">Current Weather</h3>
+              <WeatherCard weather={itinerary.weather} />
+            </div>
+          )}
         </CardHeader>
       </Card>
 
