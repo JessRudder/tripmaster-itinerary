@@ -24,7 +24,7 @@ const activityTypeLabels = {
 export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerating }: ItineraryDisplayProps) {
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
-      {/* Hero Photo Section */}
+      {/* Hero Photo Section - only show if hero photo exists */}
       {itinerary.heroPhoto && (
         <Card className="overflow-hidden">
           <div className="relative h-64 md:h-80">

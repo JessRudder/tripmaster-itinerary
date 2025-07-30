@@ -48,6 +48,9 @@ Make activities realistic, specific to the destination, and well-sequenced. Ensu
       })
     )
     
+    // Generate hero photo (might be null if not a famous destination)
+    const heroPhoto = await generateDestinationHeroPhoto(formData.destination)
+    
     const itinerary: TripItinerary = {
       id: `trip-${Date.now()}`,
       destination: formData.destination,
@@ -56,7 +59,7 @@ Make activities realistic, specific to the destination, and well-sequenced. Ensu
       activityType: formData.activityType,
       activities: activitiesWithPhotos,
       createdAt: new Date().toISOString(),
-      heroPhoto: await generateDestinationHeroPhoto(formData.destination)
+      ...(heroPhoto && { heroPhoto })
     }
     
     return itinerary

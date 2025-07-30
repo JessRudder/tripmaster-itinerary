@@ -1,8 +1,28 @@
 import { PhotoData } from './types'
 
 /**
- * Generates relevant photos for a destination activity using AI to determine photo relevance
- * Only returns photos if they are actually relevant to the location and activity
+ * Photo Service - Location-Specific Photo Management
+ * 
+ * Current Implementation Status:
+ * This service currently returns empty arrays for all photo requests to ensure
+ * that only relevant, location-specific photos are shown. Random placeholder
+ * images from services like Picsum are not location-relevant and provide a poor
+ * user experience.
+ * 
+ * Future Enhancement Options:
+ * 1. Integration with photo APIs that provide actual location photos (e.g., Unsplash API)
+ * 2. Curated photo database for common destinations
+ * 3. User-uploaded photo sharing system
+ * 
+ * The AI analysis remains in place to identify when destinations/activities
+ * would be suitable for photos, so the infrastructure is ready for when
+ * a proper photo source becomes available.
+ */
+
+/**
+ * Analyzes whether photos should be shown for an activity
+ * Currently returns empty array as we cannot guarantee location-specific photos
+ * This prevents showing irrelevant random images
  */
 export async function generatePhotosForActivity(
   destination: string, 
@@ -10,59 +30,39 @@ export async function generatePhotosForActivity(
   activityType: string
 ): Promise<PhotoData[]> {
   try {
-    // Use AI to determine if we should show photos and generate relevant search terms
-    const photoAnalysisPrompt = spark.llmPrompt`Analyze this travel activity and determine if it's the type of activity that would have relevant, recognizable photos available:
+    // Use AI to determine if this activity is photo-worthy and specific
+    const photoAnalysisPrompt = spark.llmPrompt`Analyze this travel activity and determine if it's a famous, well-known landmark or attraction that tourists universally recognize:
 
 Destination: ${destination}
 Activity: ${activity}
 Activity Type: ${activityType}
 
 Consider:
-1. Is this a real, well-known destination?
-2. Is this a specific, photographable activity/attraction?
-3. Would tourists typically take photos of this activity?
-4. Is this concrete enough to have visual representation?
+1. Is this a world-famous landmark (like Eiffel Tower, Statue of Liberty, etc.)?
+2. Is this a universally recognizable attraction?
+3. Is this specific enough that any photo would clearly represent this exact place?
 
-If YES, provide 3 specific photo search terms that would find relevant images.
-If NO, respond with "NO_PHOTOS".
+Be very strict - only return true for extremely famous, iconic places that everyone would recognize.
 
 Respond with JSON:
 {
-  "hasRelevantPhotos": true/false,
-  "searchTerms": ["term1", "term2", "term3"] or null,
+  "isFamousLandmark": true/false,
+  "confidence": "high/medium/low",
   "reason": "brief explanation"
 }`
 
     const analysisResponse = await spark.llm(photoAnalysisPrompt, "gpt-4o-mini", true)
     const analysis = JSON.parse(analysisResponse)
     
-    // If AI determines photos aren't relevant, return empty array
-    if (!analysis.hasRelevantPhotos || !analysis.searchTerms) {
-      console.log(`No relevant photos available for ${activity} in ${destination}: ${analysis.reason}`)
-      return []
-    }
+    // Only show photos for extremely famous landmarks to ensure relevance
+    // For now, being conservative and not showing photos to avoid irrelevant images
+    console.log(`Photo analysis for ${activity} in ${destination}: ${analysis.reason}`)
     
-    // Generate photos using the AI-determined search terms
-    const photos: PhotoData[] = []
+    // Return empty array - no photos until we can guarantee they're location-specific
+    return []
     
-    for (let i = 0; i < Math.min(3, analysis.searchTerms.length); i++) {
-      const searchTerm = analysis.searchTerms[i]
-      const seed = hashString(`${destination}-${searchTerm}-${i}`)
-      
-      // Use Picsum with improved seeding for more consistency, but with relevant alt text
-      const url = `https://picsum.photos/seed/${seed}/800/600`
-      
-      photos.push({
-        url,
-        alt: `${searchTerm} in ${destination}`,
-        caption: generateContextualCaption(destination, activity, searchTerm)
-      })
-    }
-    
-    return photos
   } catch (error) {
-    console.warn('Failed to generate photos for activity:', error)
-    // Return empty array if photo generation fails
+    console.warn('Failed to analyze photo suitability:', error)
     return []
   }
 }
@@ -102,58 +102,41 @@ function generateContextualCaption(destination: string, activity: string, search
 }
 
 /**
- * Generates a hero photo for the destination overview
+ * Analyzes whether a hero photo should be shown for the destination
+ * Currently returns null as we cannot guarantee location-specific photos
  */
-export async function generateDestinationHeroPhoto(destination: string): Promise<PhotoData> {
+export async function generateDestinationHeroPhoto(destination: string): Promise<PhotoData | null> {
   try {
-    // Use AI to determine if this is a real destination worth showing photos for
-    const heroAnalysisPrompt = spark.llmPrompt`Analyze this destination and determine if it's a real, well-known place that would have recognizable landmark photos:
+    // Use AI to determine if this is a world-famous destination
+    const heroAnalysisPrompt = spark.llmPrompt`Analyze this destination and determine if it's an extremely famous, world-renowned location:
 
 Destination: ${destination}
 
 Consider:
-1. Is this a real city, country, or tourist destination?
-2. Would it have iconic landmarks or scenery?
-3. Is it specific enough to find relevant photos?
+1. Is this a world-famous city or landmark that everyone recognizes?
+2. Is this specific enough that any photo would clearly represent this exact place?
+3. Would this destination be featured in major travel guides and be universally known?
 
-If YES, provide the best search term for a landmark/scenic photo.
-If NO, respond with "NO_PHOTO".
+Be very strict - only return true for destinations like Paris, New York, Tokyo, etc.
 
 Respond with JSON:
 {
-  "hasLandmark": true/false,
-  "searchTerm": "specific search term" or null,
+  "isWorldFamous": true/false,
+  "confidence": "high/medium/low",
   "reason": "brief explanation"
 }`
 
     const analysisResponse = await spark.llm(heroAnalysisPrompt, "gpt-4o-mini", true)
     const analysis = JSON.parse(analysisResponse)
     
-    if (!analysis.hasLandmark || !analysis.searchTerm) {
-      // Return a generic travel-themed placeholder
-      return {
-        url: `https://picsum.photos/seed/travel-${hashString(destination)}/1200/800`,
-        alt: `${destination} destination`,
-        caption: `Welcome to ${destination}`
-      }
-    }
+    console.log(`Hero photo analysis for ${destination}: ${analysis.reason}`)
     
-    // Use Picsum with the AI-determined search term for consistent images
-    const seed = hashString(`${destination}-${analysis.searchTerm}-hero`)
-    const url = `https://picsum.photos/seed/${seed}/1200/800`
+    // For now, being conservative and not showing hero photos to avoid irrelevant images
+    // Return null - no hero photo until we can guarantee it's location-specific
+    return null
     
-    return {
-      url,
-      alt: `${destination} landmark view`,
-      caption: `Welcome to ${destination}`
-    }
   } catch (error) {
-    console.warn('Failed to generate hero photo:', error)
-    // Return a generic fallback
-    return {
-      url: `https://picsum.photos/seed/travel-fallback/1200/800`,
-      alt: `${destination} destination`,
-      caption: `Welcome to ${destination}`
-    }
+    console.warn('Failed to analyze destination for hero photo:', error)
+    return null
   }
 }
