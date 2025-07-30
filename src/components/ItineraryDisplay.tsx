@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { TripItinerary } from '@/lib/types'
 import { DayCard } from './DayCard'
 import { WeatherCard } from './WeatherCard'
@@ -25,18 +26,37 @@ const activityTypeLabels = {
 
 export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerating }: ItineraryDisplayProps) {
   const [currentDayIndex, setCurrentDayIndex] = useState(0)
+  const [direction, setDirection] = useState(0) // -1 for left, 1 for right
+  const [isTransitioning, setIsTransitioning] = useState(false)
   
   const handlePreviousDay = () => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
+    setDirection(-1)
     setCurrentDayIndex(prev => prev > 0 ? prev - 1 : itinerary.activities.length - 1)
+    setTimeout(() => setIsTransitioning(false), 300)
   }
   
   const handleNextDay = () => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
+    setDirection(1)
     setCurrentDayIndex(prev => prev < itinerary.activities.length - 1 ? prev + 1 : 0)
+    setTimeout(() => setIsTransitioning(false), 300)
+  }
+  
+  const handleDaySelect = (index: number) => {
+    if (isTransitioning || index === currentDayIndex) return
+    setIsTransitioning(true)
+    setDirection(index > currentDayIndex ? 1 : -1)
+    setCurrentDayIndex(index)
+    setTimeout(() => setIsTransitioning(false), 300)
   }
   
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (isTransitioning) return
       if (event.key === 'ArrowLeft') {
         handlePreviousDay()
       } else if (event.key === 'ArrowRight') {
@@ -46,7 +66,7 @@ export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerati
     
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [isTransitioning])
   
   const currentActivity = itinerary.activities[currentDayIndex]
   
@@ -151,26 +171,40 @@ export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerati
                 variant="outline"
                 size="sm"
                 onClick={handlePreviousDay}
-                className="flex items-center gap-2"
+                disabled={isTransitioning}
+                className="flex items-center gap-2 transition-opacity"
               >
                 <CaretLeft size={16} />
                 Previous Day
               </Button>
               
               <div className="text-center">
-                <h2 className="text-xl font-semibold">
+                <motion.h2 
+                  key={`title-${currentDayIndex}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-xl font-semibold"
+                >
                   Day {currentActivity.day} of {itinerary.activities.length}
-                </h2>
-                <p className="text-sm text-muted-foreground">
+                </motion.h2>
+                <motion.p 
+                  key={`subtitle-${currentDayIndex}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="text-sm text-muted-foreground"
+                >
                   {currentActivity.title}
-                </p>
+                </motion.p>
               </div>
               
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleNextDay}
-                className="flex items-center gap-2"
+                disabled={isTransitioning}
+                className="flex items-center gap-2 transition-opacity"
               >
                 Next Day
                 <CaretRight size={16} />
@@ -180,14 +214,17 @@ export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerati
             {/* Day indicators */}
             <div className="flex justify-center gap-2 mt-4">
               {itinerary.activities.map((_, index) => (
-                <button
+                <motion.button
                   key={index}
-                  onClick={() => setCurrentDayIndex(index)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
+                  onClick={() => handleDaySelect(index)}
+                  disabled={isTransitioning}
+                  whileHover={{ scale: index !== currentDayIndex ? 1.1 : 1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
                     index === currentDayIndex 
-                      ? 'bg-primary' 
+                      ? 'bg-primary scale-110' 
                       : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                  }`}
+                  } ${isTransitioning ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                   aria-label={`Go to day ${index + 1}`}
                 />
               ))}
@@ -196,16 +233,69 @@ export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerati
         </Card>
 
         {/* Current Day Card */}
-        <div className="flex justify-center">
-          <div className="w-full max-w-2xl">
-            <DayCard activity={currentActivity} />
+        <motion.div 
+          className="flex justify-center"
+          animate={{ 
+            backgroundColor: isTransitioning ? 'var(--muted)' : 'transparent'
+          }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="w-full max-w-2xl relative">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={currentDayIndex}
+                custom={direction}
+                initial={{ 
+                  x: direction > 0 ? '100%' : '-100%', 
+                  opacity: 0,
+                  scale: 0.95
+                }}
+                animate={{ 
+                  x: 0, 
+                  opacity: 1,
+                  scale: 1
+                }}
+                exit={{ 
+                  x: direction > 0 ? '-100%' : '100%', 
+                  opacity: 0,
+                  scale: 0.95
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 260,
+                  damping: 20,
+                  mass: 0.8,
+                  opacity: { duration: 0.2 },
+                  scale: { duration: 0.3 }
+                }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.1}
+                onDragEnd={(event, info) => {
+                  const swipeThreshold = 50
+                  if (info.offset.x > swipeThreshold && !isTransitioning) {
+                    handlePreviousDay()
+                  } else if (info.offset.x < -swipeThreshold && !isTransitioning) {
+                    handleNextDay()
+                  }
+                }}
+                className="w-full cursor-grab active:cursor-grabbing"
+              >
+                <DayCard activity={currentActivity} />
+              </motion.div>
+            </AnimatePresence>
             
-            {/* Navigation hint */}
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              Use arrow keys ← → or buttons above to navigate between days
-            </p>
+            {/* Navigation hint with fade animation */}
+            <motion.p 
+              className="text-xs text-muted-foreground text-center mt-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
+            >
+              Use arrow keys ← → or swipe left/right to navigate between days
+            </motion.p>
           </div>
-        </div>
+        </motion.div>
       </div>
       
       <Card className="bg-muted/30">
