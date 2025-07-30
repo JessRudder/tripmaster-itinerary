@@ -27,9 +27,20 @@ export function DayCard({ activity }: DayCardProps) {
     <Card className="h-full transition-all duration-200 hover:shadow-md hover:-translate-y-1">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">
-            Day {activity.day}
-          </CardTitle>
+          <div>
+            <CardTitle className="text-lg font-semibold">
+              Day {activity.day}
+            </CardTitle>
+            {activity.date && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {new Date(activity.date).toLocaleDateString('en-US', { 
+                  weekday: 'short', 
+                  month: 'short', 
+                  day: 'numeric' 
+                })}
+              </p>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             {activity.timeOfDay && (
               <Badge variant="outline" className="text-xs">

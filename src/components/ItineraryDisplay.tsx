@@ -88,6 +88,12 @@ export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerati
               <Calendar size={14} />
               {itinerary.days} {itinerary.days === 1 ? 'day' : 'days'}
             </Badge>
+            {itinerary.startDate && itinerary.endDate && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Calendar size={14} />
+                {new Date(itinerary.startDate).toLocaleDateString()} - {new Date(itinerary.endDate).toLocaleDateString()}
+              </Badge>
+            )}
             {itinerary.hasChildren && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 <Users size={14} />

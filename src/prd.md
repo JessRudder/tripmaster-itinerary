@@ -34,14 +34,19 @@
 ## Essential Features
 
 ### Trip Planning Form
-- **Functionality**: Collects destination, duration, family status, and activity preferences
-- **Purpose**: Provides AI with context to generate personalized recommendations
-- **Success Criteria**: Form completion leads to relevant, customized itinerary
+- **Functionality**: Collects destination, duration, family status, activity preferences, and optional trip dates
+- **Purpose**: Provides AI with context to generate personalized recommendations with date-specific weather information
+- **Success Criteria**: Form completion leads to relevant, customized itinerary with weather forecasts
 
 ### AI Itinerary Generation  
-- **Functionality**: Creates day-by-day plans with main activities, descriptions, add-ons, cost estimates, and timing
-- **Purpose**: Eliminates manual research and planning burden
-- **Success Criteria**: Generated plans are specific, actionable, and appropriately themed
+- **Functionality**: Creates day-by-day plans with main activities, descriptions, add-ons, cost estimates, timing, and date-specific weather
+- **Purpose**: Eliminates manual research and planning burden while providing weather-aware recommendations
+- **Success Criteria**: Generated plans are specific, actionable, appropriately themed, and include relevant weather information
+
+### Date-Specific Weather Integration
+- **Functionality**: Provides actual weather forecasts for trip dates using OpenWeatherMap API, with intelligent fallbacks for dates beyond forecast range
+- **Purpose**: Helps users pack appropriately and adjust activities based on expected weather conditions
+- **Success Criteria**: Weather information is accurate for forecast period and provides reasonable estimates for future dates
 
 ### Intelligent Photo Integration (Unsplash API)
 - **Functionality**: AI-powered photo discovery using Unsplash API with location-specific search terms and relevance filtering

@@ -3,6 +3,8 @@ export interface TripFormData {
   days: number
   hasChildren: boolean
   activityType: ActivityType
+  startDate?: string
+  endDate?: string
 }
 
 export type ActivityType = 
@@ -31,6 +33,7 @@ export interface WeatherData {
 
 export interface DayActivity {
   day: number
+  date?: string
   mainActivity: string
   description: string
   addOns: string[]
@@ -48,6 +51,8 @@ export interface TripItinerary {
   activityType: ActivityType
   activities: DayActivity[]
   createdAt: string
+  startDate?: string
+  endDate?: string
   heroPhoto?: PhotoData
   weather?: WeatherData
 }

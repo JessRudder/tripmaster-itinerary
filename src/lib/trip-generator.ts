@@ -1,6 +1,6 @@
 import { TripFormData, TripItinerary, DayActivity } from './types'
 import { generatePhotosForActivity, generateDestinationHeroPhoto } from './photo-service'
-import { fetchWeatherData } from './weather-service'
+import { fetchWeatherData, fetchWeatherForDate } from './weather-service'
 
 export async function generateItinerary(formData: TripFormData): Promise<TripItinerary> {
   const childrenText = formData.hasChildren ? "family-friendly activities suitable for children" : "activities for adults"
@@ -34,21 +34,45 @@ Make activities realistic, specific to the destination, and well-sequenced. Ensu
     const response = await spark.llm(prompt, "gpt-4o", true)
     const parsed = JSON.parse(response)
     
-    // Fetch weather data for the destination
-    const weatherData = await fetchWeatherData(formData.destination)
+    // Calculate individual day dates if start date is provided
+    const dayDates: string[] = []
+    if (formData.startDate) {
+      const startDate = new Date(formData.startDate)
+      for (let i = 0; i < formData.days; i++) {
+        const dayDate = new Date(startDate)
+        dayDate.setDate(startDate.getDate() + i)
+        dayDates.push(dayDate.toISOString().split('T')[0])
+      }
+    }
     
-    // Generate photos for each activity
-    const activitiesWithPhotos = await Promise.all(
-      parsed.activities.map(async (activity: DayActivity) => {
+    // Fetch weather data for the destination (general forecast)
+    const generalWeatherData = await fetchWeatherData(formData.destination)
+    
+    // Generate photos and weather for each activity
+    const activitiesWithPhotosAndWeather = await Promise.all(
+      parsed.activities.map(async (activity: DayActivity, index: number) => {
         const photos = await generatePhotosForActivity(
           formData.destination,
           activity.mainActivity,
           formData.activityType
         )
+        
+        // Get weather for specific date if available, otherwise use general weather
+        let dayWeather = generalWeatherData
+        const dayDate = dayDates[index]
+        if (dayDate) {
+          try {
+            dayWeather = await fetchWeatherForDate(formData.destination, dayDate)
+          } catch (error) {
+            console.warn(`Could not fetch weather for ${dayDate}, using general weather`)
+          }
+        }
+        
         return {
           ...activity,
+          date: dayDate,
           photos,
-          weather: weatherData // Add weather to each day
+          weather: dayWeather
         }
       })
     )
@@ -62,9 +86,11 @@ Make activities realistic, specific to the destination, and well-sequenced. Ensu
       days: formData.days,
       hasChildren: formData.hasChildren,
       activityType: formData.activityType,
-      activities: activitiesWithPhotos,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      activities: activitiesWithPhotosAndWeather,
       createdAt: new Date().toISOString(),
-      weather: weatherData, // Add weather to the main itinerary
+      weather: generalWeatherData,
       ...(heroPhoto && { heroPhoto })
     }
     
