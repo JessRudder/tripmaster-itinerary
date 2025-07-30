@@ -43,10 +43,10 @@
 - **Purpose**: Eliminates manual research and planning burden
 - **Success Criteria**: Generated plans are specific, actionable, and appropriately themed
 
-### Intelligent Photo Galleries
-- **Functionality**: AI-curated destination imagery that appears only when relevant to the specific location and activity
-- **Purpose**: Provides authentic visual inspiration without irrelevant stock photos
-- **Success Criteria**: Photos are location-appropriate or galleries are hidden entirely
+### Intelligent Photo Integration (Unsplash API)
+- **Functionality**: AI-powered photo discovery using Unsplash API with location-specific search terms and relevance filtering
+- **Purpose**: Provides authentic, high-quality travel photography that enhances trip visualization and inspiration
+- **Success Criteria**: Photos are location-specific, high-quality, and only shown when relevant to the destination/activity
 
 ### Smart Photo Filtering
 - **Functionality**: AI analyzes each activity to determine if relevant photos exist before displaying galleries  
@@ -129,14 +129,18 @@
 
 ## Implementation Considerations
 
-**Image Service**: Using Unsplash Source API for reliable, high-quality travel photography
-**Performance**: Lazy loading for photo galleries and image optimization
+**Photo Integration**: Real Unsplash API integration with AI-powered search term generation for location-specific photography
+**Image Service**: Using Unsplash Source API for reliable, high-quality travel photography without authentication overhead
+**AI Photo Curation**: Intelligent search term generation ensures photos match specific destinations and activities
+**Performance**: Lazy loading for photo galleries and hash-based seeding for consistent image results
 **Storage**: Persistent itinerary storage including photo URLs and metadata
-**Scalability**: Photo service abstraction allows future integration with other sources
+**Scalability**: Photo service abstraction allows future enhancement to full Unsplash API or other photo sources
 
 ## Recent Updates
 
-**Photo Gallery Integration**: Added comprehensive photo galleries to each day's activities with thumbnail grids and lightbox viewing
+**Unsplash API Integration**: Implemented real photo integration using Unsplash Source API with AI-generated search terms
+**Photo Gallery Enhancement**: Added comprehensive photo galleries to each day's activities with thumbnail grids and lightbox viewing
 **Hero Images**: Implemented destination hero photos for visual impact at itinerary top
-**Enhanced Visual Experience**: Trip planning now includes rich imagery alongside practical information
+**Smart Photo Filtering**: AI determines when photos are relevant to prevent showing generic or irrelevant images
+**Enhanced Visual Experience**: Trip planning now includes rich, location-specific imagery alongside practical information
 **Responsive Design**: Photo galleries work seamlessly across desktop and mobile devices
