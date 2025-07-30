@@ -43,15 +43,20 @@
 - **Purpose**: Eliminates manual research and planning burden
 - **Success Criteria**: Generated plans are specific, actionable, and appropriately themed
 
-### Photo Galleries (New Feature)
-- **Functionality**: Displays curated destination imagery for each activity with lightbox viewing
-- **Purpose**: Provides visual inspiration and helps users better envision their trip
-- **Success Criteria**: Photos load reliably, gallery interactions are smooth, and images enhance planning experience
+### Intelligent Photo Galleries
+- **Functionality**: AI-curated destination imagery that appears only when relevant to the specific location and activity
+- **Purpose**: Provides authentic visual inspiration without irrelevant stock photos
+- **Success Criteria**: Photos are location-appropriate or galleries are hidden entirely
+
+### Smart Photo Filtering
+- **Functionality**: AI analyzes each activity to determine if relevant photos exist before displaying galleries  
+- **Purpose**: Ensures users only see meaningful imagery that enhances their planning
+- **Success Criteria**: Generic activities show no photos; specific attractions show relevant imagery
 
 ### Destination Hero Images
-- **Functionality**: Large hero photo at top of each itinerary showcasing the destination
-- **Purpose**: Creates immediate visual connection and excitement about the destination
-- **Success Criteria**: Hero images properly represent the destination and create emotional engagement
+- **Functionality**: AI-analyzed hero photos that appear only for recognizable destinations
+- **Purpose**: Creates immediate visual connection for real places while avoiding generic imagery
+- **Success Criteria**: Hero images represent actual destinations or use tasteful fallbacks
 
 ### Persistent Storage
 - **Functionality**: Saves generated itineraries for future reference
@@ -85,9 +90,11 @@
 **Font Personality**: Clean, modern, and highly readable across all device sizes
 **Typography Consistency**: Consistent spacing and sizing using Tailwind scale
 
-### Photo Gallery Design
-**Image Quality**: High-resolution travel photography from Unsplash
-**Gallery Interaction**: Thumbnail grid with modal lightbox for detailed viewing
+### Smart Photo Integration
+**AI Photo Relevance**: Advanced photo service uses AI to determine photo appropriateness
+**Gallery Behavior**: Photo galleries only appear when images would be genuinely helpful
+**Fallback Handling**: Graceful degradation when photos aren't available or relevant
+**Search Intelligence**: AI generates specific search terms rather than using generic destination names
 **Loading States**: Smooth loading animations with skeleton placeholders
 **Navigation**: Intuitive photo navigation with keyboard and click support
 

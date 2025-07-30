@@ -81,8 +81,10 @@ export function PhotoGallery({ photos, className = '' }: PhotoGalleryProps) {
                 onError={(e) => {
                   // Fallback to a placeholder if image fails to load
                   const target = e.target as HTMLImageElement
-                  target.src = `https://via.placeholder.com/400x300/e2e8f0/64748b?text=${encodeURIComponent(photo.alt)}`
-                  handleImageLoad(index)
+                  if (!target.src.includes('via.placeholder.com')) {
+                    target.src = `https://via.placeholder.com/400x300/e2e8f0/64748b?text=${encodeURIComponent(photo.alt)}`
+                    handleImageLoad(index)
+                  }
                 }}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200" />
@@ -142,7 +144,9 @@ export function PhotoGallery({ photos, className = '' }: PhotoGalleryProps) {
                   onError={(e) => {
                     // Fallback for lightbox images too
                     const target = e.target as HTMLImageElement
-                    target.src = `https://via.placeholder.com/800x600/e2e8f0/64748b?text=${encodeURIComponent(photos[selectedPhoto].alt)}`
+                    if (!target.src.includes('via.placeholder.com')) {
+                      target.src = `https://via.placeholder.com/800x600/e2e8f0/64748b?text=${encodeURIComponent(photos[selectedPhoto].alt)}`
+                    }
                   }}
                 />
                 

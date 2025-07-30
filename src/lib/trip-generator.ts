@@ -56,7 +56,7 @@ Make activities realistic, specific to the destination, and well-sequenced. Ensu
       activityType: formData.activityType,
       activities: activitiesWithPhotos,
       createdAt: new Date().toISOString(),
-      heroPhoto: generateDestinationHeroPhoto(formData.destination)
+      heroPhoto: await generateDestinationHeroPhoto(formData.destination)
     }
     
     return itinerary
