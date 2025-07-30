@@ -1,41 +1,50 @@
 import { PhotoData } from './types'
 
 /**
- * Generates relevant photos for a destination activity using Unsplash
- * This provides high-quality, travel-focused imagery for each itinerary item
+ * Generates relevant photos for a destination activity using Picsum
+ * This provides high-quality, placeholder imagery for each itinerary item
  */
 export async function generatePhotosForActivity(
   destination: string, 
   activity: string,
   activityType: string
 ): Promise<PhotoData[]> {
-  // Create search terms that combine destination with activity context
-  const searchTerms = [
-    `${destination} ${activity}`,
-    `${destination} travel`,
-    `${destination} tourism`,
-    `${activityType} ${destination}`
-  ]
-  
   const photos: PhotoData[] = []
   
-  // Generate 3-4 photos per activity using different search terms
-  for (let i = 0; i < Math.min(3, searchTerms.length); i++) {
-    const searchTerm = encodeURIComponent(searchTerms[i])
+  try {
+    // Generate 3 photos per activity using Picsum with different seeds
+    for (let i = 0; i < 3; i++) {
+      // Use a deterministic seed based on destination and activity to ensure consistency
+      const seedInput = `${destination}-${activity}-${i}`
+      const seed = hashString(seedInput)
+      const url = `https://picsum.photos/seed/${seed}/800/600`
+      
+      photos.push({
+        url,
+        alt: `${activity} in ${destination}`,
+        caption: generateCaption(destination, activity, i)
+      })
+    }
     
-    // Using Unsplash Source API for high-quality travel photos
-    // Adding random seed to get variety in images
-    const seed = Math.floor(Math.random() * 1000000)
-    const url = `https://source.unsplash.com/800x600/?${searchTerm}&sig=${seed}`
-    
-    photos.push({
-      url,
-      alt: `${activity} in ${destination}`,
-      caption: generateCaption(destination, activity, i)
-    })
+    return photos
+  } catch (error) {
+    console.warn('Failed to generate photos for activity:', error)
+    // Return empty array if photo generation fails
+    return []
   }
-  
-  return photos
+}
+
+/**
+ * Simple string hash function to generate consistent seeds
+ */
+function hashString(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString()
 }
 
 /**
@@ -56,10 +65,20 @@ function generateCaption(destination: string, activity: string, index: number): 
  * Generates a hero photo for the destination overview
  */
 export function generateDestinationHeroPhoto(destination: string): PhotoData {
-  const seed = Math.floor(Math.random() * 1000000)
-  return {
-    url: `https://source.unsplash.com/1200x800/?${encodeURIComponent(destination)},travel,landmark&sig=${seed}`,
-    alt: `${destination} landmark view`,
-    caption: `Welcome to ${destination}`
+  try {
+    const seed = hashString(`${destination}-hero`)
+    return {
+      url: `https://picsum.photos/seed/${seed}/1200/800`,
+      alt: `${destination} landmark view`,
+      caption: `Welcome to ${destination}`
+    }
+  } catch (error) {
+    console.warn('Failed to generate hero photo:', error)
+    // Return a fallback photo
+    return {
+      url: `https://via.placeholder.com/1200x800/e2e8f0/64748b?text=${encodeURIComponent(destination)}`,
+      alt: `${destination} landmark view`,
+      caption: `Welcome to ${destination}`
+    }
   }
 }

@@ -18,7 +18,17 @@ export function PhotoGallery({ photos, className = '' }: PhotoGalleryProps) {
   const [imageLoaded, setImageLoaded] = useState<Record<number, boolean>>({})
 
   if (!photos || photos.length === 0) {
-    return null
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <Camera size={16} className="text-muted-foreground" />
+          Photo Gallery
+        </div>
+        <div className="text-xs text-muted-foreground italic">
+          Photos not available for this activity
+        </div>
+      </div>
+    )
   }
 
   const openLightbox = (index: number) => {
@@ -68,7 +78,12 @@ export function PhotoGallery({ photos, className = '' }: PhotoGalleryProps) {
                   imageLoaded[index] ? 'opacity-100' : 'opacity-0'
                 }`}
                 onLoad={() => handleImageLoad(index)}
-                onError={() => handleImageLoad(index)} // Still mark as loaded even on error
+                onError={(e) => {
+                  // Fallback to a placeholder if image fails to load
+                  const target = e.target as HTMLImageElement
+                  target.src = `https://via.placeholder.com/400x300/e2e8f0/64748b?text=${encodeURIComponent(photo.alt)}`
+                  handleImageLoad(index)
+                }}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200" />
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -124,6 +139,11 @@ export function PhotoGallery({ photos, className = '' }: PhotoGalleryProps) {
                   src={photos[selectedPhoto].url}
                   alt={photos[selectedPhoto].alt}
                   className="max-w-full max-h-[calc(100%-80px)] object-contain rounded-lg"
+                  onError={(e) => {
+                    // Fallback for lightbox images too
+                    const target = e.target as HTMLImageElement
+                    target.src = `https://via.placeholder.com/800x600/e2e8f0/64748b?text=${encodeURIComponent(photos[selectedPhoto].alt)}`
+                  }}
                 />
                 
                 {/* Caption */}

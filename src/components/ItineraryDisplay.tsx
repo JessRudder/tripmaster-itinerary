@@ -32,6 +32,11 @@ export function ItineraryDisplay({ itinerary, onBack, onRegenerate, isRegenerati
               src={itinerary.heroPhoto.url}
               alt={itinerary.heroPhoto.alt}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                // Fallback for hero image
+                const target = e.target as HTMLImageElement
+                target.src = `https://via.placeholder.com/1200x800/e2e8f0/64748b?text=${encodeURIComponent(itinerary.destination)}`
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
             <div className="absolute bottom-6 left-6 text-white">
