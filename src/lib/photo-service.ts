@@ -1,4 +1,5 @@
 import { PhotoData } from './types'
+import { renderPrompt, createSparkPrompt } from './prompt-service'
 
 /**
  * Photo Service - Location-Specific Photo Management with Unsplash API
@@ -115,30 +116,14 @@ export async function generatePhotosForActivity(
 ): Promise<PhotoData[]> {
   try {
     // Use AI to generate optimal search terms for location-specific photos
-    const searchTermPrompt = spark.llmPrompt`Generate optimal photo search terms for finding location-specific travel photos.
+    const { prompt: renderedPrompt, model, outputFormat } = await renderPrompt('photo-search-terms', {
+      destination,
+      activity,
+      activityType
+    })
 
-Destination: ${destination}
-Activity: ${activity}
-Activity Type: ${activityType}
-
-Create 1-2 specific search terms that would find relevant photos of this exact place/activity. The terms should be:
-1. Specific enough to show the actual destination/landmark
-2. Focus on the most recognizable or iconic aspect
-3. Be concise (1-3 words maximum per term)
-
-Examples of good terms:
-- "Eiffel Tower" (not "tower in Paris")
-- "Tokyo skyline" (not "urban cityscape Japan")
-- "Grand Canyon" (not "desert landscape Arizona")
-
-Respond with JSON:
-{
-  "searchTerms": ["term1", "term2"],
-  "shouldShowPhotos": true/false,
-  "reasoning": "why these terms or why no photos"
-}`
-
-    const response = await spark.llm(searchTermPrompt, "gpt-4o-mini", true)
+    const sparkPrompt = createSparkPrompt(renderedPrompt)
+    const response = await spark.llm(sparkPrompt, model || "gpt-4o-mini", outputFormat === 'json')
     const searchData = JSON.parse(response)
     
     console.log(`Photo search for ${activity} in ${destination}:`, searchData.reasoning)
@@ -177,29 +162,12 @@ Respond with JSON:
 export async function generateDestinationHeroPhoto(destination: string): Promise<PhotoData | null> {
   try {
     // Use AI to generate the best search term for a destination hero photo
-    const heroSearchPrompt = spark.llmPrompt`Generate the best search term for finding a hero photo of this travel destination.
+    const { prompt: renderedPrompt, model, outputFormat } = await renderPrompt('hero-photo-search', {
+      destination
+    })
 
-Destination: ${destination}
-
-Create a single, specific search term (1-3 words) that would find an iconic, representative photo of this destination. The term should:
-1. Be specific to the destination
-2. Likely to return recognizable landmarks or cityscape photos
-3. Capture the essence of the place
-4. Be concise and focused
-
-Examples:
-- "Paris" → "Eiffel Tower"
-- "New York" → "Manhattan skyline"
-- "London" → "Big Ben"
-
-Respond with JSON:
-{
-  "searchTerm": "single best search term",
-  "shouldShowHero": true/false,
-  "reasoning": "why this term or why no hero photo"
-}`
-
-    const response = await spark.llm(heroSearchPrompt, "gpt-4o-mini", true)
+    const sparkPrompt = createSparkPrompt(renderedPrompt)
+    const response = await spark.llm(sparkPrompt, model || "gpt-4o-mini", outputFormat === 'json')
     const heroData = JSON.parse(response)
     
     console.log(`Hero photo search for ${destination}:`, heroData.reasoning)

@@ -58,10 +58,20 @@
 - **Purpose**: Helps users pack appropriately and set realistic expectations for outdoor activities
 - **Success Criteria**: Weather information is accurate, visually appealing, and prominently displayed without overwhelming the itinerary
 
-### Smart Photo Filtering
-- **Functionality**: AI analyzes each activity to determine if relevant photos exist before displaying galleries  
-- **Purpose**: Ensures users only see meaningful imagery that enhances their planning
-- **Success Criteria**: Generic activities show no photos; specific attractions show relevant imagery
+### AI Prompt Management & Evaluation
+- **Functionality**: YAML-based prompt templates compatible with GitHub's evaluation tools, with runtime rendering system
+- **Purpose**: Enables systematic testing and improvement of AI prompts while maintaining application functionality
+- **Success Criteria**: Prompts are externalized, testable, and easily updated without code changes
+
+### Smart Packing Recommendations
+- **Functionality**: AI-generated packing lists based on activities, weather, and trip duration with categorized priorities  
+- **Purpose**: Helps users pack efficiently with destination and weather-appropriate items
+- **Success Criteria**: Packing suggestions are relevant, well-categorized, and include clear reasoning for each item
+
+### Interactive Day Navigation
+- **Functionality**: Stacked card interface with smooth slide animations for browsing daily activities
+- **Purpose**: Creates engaging interaction model that guides users through their planned journey chronologically
+- **Success Criteria**: Navigation feels intuitive, animations are smooth, and users can easily access any day's information
 
 ### Destination Hero Images
 - **Functionality**: AI-analyzed hero photos that appear only for recognizable destinations
@@ -139,6 +149,8 @@
 
 ## Implementation Considerations
 
+**Prompt Architecture**: YAML-based prompt templates stored in `/src/prompts/` and `/public/prompts/` directories enable GitHub evaluation tool compatibility while maintaining runtime functionality through custom prompt service
+**AI Service Integration**: Centralized prompt management with variable substitution, conditional logic, and model/format specification per prompt template
 **Photo Integration**: Real Unsplash API integration with AI-powered search term generation for location-specific photography
 **Image Service**: Using Unsplash Source API for reliable, high-quality travel photography without authentication overhead
 **AI Photo Curation**: Intelligent search term generation ensures photos match specific destinations and activities
@@ -148,9 +160,12 @@
 
 ## Recent Updates
 
+**Prompt Refactoring**: Migrated all AI prompts to YAML files with variables and metadata for GitHub eval tool compatibility
+**Prompt Service**: Implemented runtime YAML prompt loading and template rendering with conditional logic support
 **Unsplash API Integration**: Implemented real photo integration using Unsplash Source API with AI-generated search terms
 **Photo Gallery Enhancement**: Added comprehensive photo galleries to each day's activities with thumbnail grids and lightbox viewing
 **Hero Images**: Implemented destination hero photos for visual impact at itinerary top
 **Smart Photo Filtering**: AI determines when photos are relevant to prevent showing generic or irrelevant images
 **Enhanced Visual Experience**: Trip planning now includes rich, location-specific imagery alongside practical information
 **Responsive Design**: Photo galleries work seamlessly across desktop and mobile devices
+**Interactive Navigation**: Stacked day cards with smooth slide animations for enhanced user experience

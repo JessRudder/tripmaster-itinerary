@@ -1,6 +1,7 @@
 import { TripFormData, TripItinerary, DayActivity, PackingItem } from './types'
 import { generatePhotosForActivity, generateDestinationHeroPhoto } from './photo-service'
 import { fetchWeatherData, fetchWeatherForDate } from './weather-service'
+import { renderPrompt, createSparkPrompt } from './prompt-service'
 
 async function generatePackingSuggestions(
   formData: TripFormData, 
@@ -11,37 +12,19 @@ async function generatePackingSuggestions(
   const weatherCondition = weatherData?.condition || 'varied weather'
   const temperature = weatherData?.temperature ? `${weatherData.temperature}°F` : 'moderate temperatures'
   
-  const prompt = spark.llmPrompt`You are a professional travel packing consultant. Generate a comprehensive packing list for a ${formData.days}-day trip to ${formData.destination}.
-
-Trip details:
-- Activities planned: ${activitiesList}
-- Activity focus: ${formData.activityType}
-- Weather: ${weatherCondition}, ${temperature}
-- Traveling with children: ${formData.hasChildren ? 'Yes' : 'No'}
-- Duration: ${formData.days} days
-
-For each item, provide:
-1. The specific item name
-2. Category: clothing, gear, accessories, documents, personal, electronics
-3. Priority: essential (absolutely must have), recommended (should have), optional (nice to have)
-4. Brief reason why it's needed for this specific trip
-
-Return valid JSON in this exact format:
-{
-  "packingList": [
-    {
-      "item": "Waterproof hiking boots",
-      "category": "clothing",
-      "priority": "essential",
-      "reason": "For hiking activities and potential wet weather"
-    }
-  ]
-}
-
-Include 15-25 items total. Consider the specific activities, weather conditions, and destination. ${formData.hasChildren ? 'Include child-specific items.' : ''} Focus on practical items that match the ${formData.activityType} activity type.`
-
   try {
-    const response = await spark.llm(prompt, "gpt-4o", true)
+    const { prompt: renderedPrompt, model, outputFormat } = await renderPrompt('packing-suggestions', {
+      days: formData.days,
+      destination: formData.destination,
+      activitiesList,
+      activityType: formData.activityType,
+      weatherCondition,
+      temperature,
+      hasChildren: formData.hasChildren
+    })
+
+    const sparkPrompt = createSparkPrompt(renderedPrompt)
+    const response = await spark.llm(sparkPrompt, model || "gpt-4o", outputFormat === 'json')
     const parsed = JSON.parse(response)
     return parsed.packingList || []
   } catch (error) {
@@ -60,33 +43,17 @@ Include 15-25 items total. Consider the specific activities, weather conditions,
 export async function generateItinerary(formData: TripFormData): Promise<TripItinerary> {
   const childrenText = formData.hasChildren ? "family-friendly activities suitable for children" : "activities for adults"
   
-  const prompt = spark.llmPrompt`You are a professional travel planner. Create a detailed ${formData.days}-day itinerary for ${formData.destination} focusing on ${formData.activityType} activities with ${childrenText}.
-
-For each day, provide:
-1. A main activity (specific attraction, experience, or location)
-2. A 2-3 sentence description of the activity
-3. 2-3 add-on suggestions that complement the main activity
-4. Estimated cost range (budget/moderate/expensive)
-5. Best time of day (morning/afternoon/evening/full-day)
-
-Return valid JSON in this exact format:
-{
-  "activities": [
-    {
-      "day": 1,
-      "mainActivity": "Activity name",
-      "description": "Detailed description",
-      "addOns": ["Add-on 1", "Add-on 2", "Add-on 3"],
-      "estimatedCost": "moderate",
-      "timeOfDay": "morning"
-    }
-  ]
-}
-
-Make activities realistic, specific to the destination, and well-sequenced. Ensure ${formData.hasChildren ? 'all activities are child-friendly' : 'activities match adult interests'}. Focus heavily on ${formData.activityType} theme.`
-
   try {
-    const response = await spark.llm(prompt, "gpt-4o", true)
+    const { prompt: renderedPrompt, model, outputFormat } = await renderPrompt('trip-itinerary', {
+      days: formData.days,
+      destination: formData.destination,
+      activityType: formData.activityType,
+      childrenText,
+      hasChildren: formData.hasChildren
+    })
+
+    const sparkPrompt = createSparkPrompt(renderedPrompt)
+    const response = await spark.llm(sparkPrompt, model || "gpt-4o", outputFormat === 'json')
     const parsed = JSON.parse(response)
     
     // Calculate individual day dates if start date is provided
