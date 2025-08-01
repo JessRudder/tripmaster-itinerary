@@ -1,6 +1,30 @@
-name: "Generate Hero Photo Search Term"
-description: "Generate the best search term for finding a hero photo of a travel destination"
+  name: Generate Hero Photo Search Term
+  description: Generate the best search term for finding a hero photo of a travel destination
+  messages:
+    - role: user
+      content: '|
+  Generate the best search term for finding a hero photo of this travel destination.
 
+  Destination: {{destination}}
+
+  Create a single, specific search term (1-3 words) that would find an iconic, representative photo of this destination. The term should:
+  1. Be specific to the destination
+  2. Likely to return recognizable landmarks or cityscape photos
+  3. Capture the essence of the place
+  4. Be concise and focused
+
+  Examples:
+  - "Paris" → "Eiffel Tower"
+  - "New York" → "Manhattan skyline"
+  - "London" → "Big Ben"
+
+  Respond with JSON:
+  {
+    "searchTerm": "single best search term",
+    "shouldShowHero": true/false,
+    "reasoning": "why this term or why no hero photo"
+  }'
+  model: openai/gpt-4o
 variables:
   - name: "destination"
     type: "string"
@@ -30,4 +54,3 @@ prompt: |
   }
 
 output_format: "json"
-model: "gpt-4o-mini"
