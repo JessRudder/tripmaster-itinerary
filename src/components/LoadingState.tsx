@@ -13,7 +13,7 @@ export function LoadingState({ message = "Creating your perfect itinerary..." }:
         <div className="space-y-2">
           <h2 className="text-xl font-semibold">{message}</h2>
           <p className="text-muted-foreground">
-            Our AI is researching the best activities and experiences for your trip...
+            Our AI is researching the best activities, gathering weather information, and finding inspiring photos for your trip...
           </p>
         </div>
       </div>
@@ -36,6 +36,16 @@ export function LoadingState({ message = "Creating your perfect itinerary..." }:
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-5/6" />
+                </div>
+              </div>
+              
+              {/* Weather skeleton */}
+              <div>
+                <Skeleton className="h-4 w-16 mb-2" />
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-6 w-6 rounded" />
+                  <Skeleton className="h-4 w-12" />
+                  <Skeleton className="h-4 w-20" />
                 </div>
               </div>
               
