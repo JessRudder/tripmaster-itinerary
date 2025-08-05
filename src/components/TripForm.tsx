@@ -28,10 +28,23 @@ export function TripForm({ onSubmit, isLoading }: TripFormProps) {
     destination: '',
     days: 3,
     hasChildren: false,
-    activityType: 'cultural'
+    activityType: 'cultural',
+    startDate: '',
+    endDate: ''
   })
 
   const [errors, setErrors] = useState<Partial<TripFormData>>({})
+
+  // Calculate end date when start date or days change
+  const updateEndDate = (startDate: string, days: number) => {
+    if (startDate) {
+      const start = new Date(startDate)
+      const end = new Date(start)
+      end.setDate(start.getDate() + days - 1)
+      return end.toISOString().split('T')[0]
+    }
+    return ''
+  }
 
   const validateForm = (): boolean => {
     const newErrors: Partial<TripFormData> = {}
@@ -42,6 +55,16 @@ export function TripForm({ onSubmit, isLoading }: TripFormProps) {
     
     if (formData.days < 1 || formData.days > 14) {
       newErrors.days = 'Trip must be between 1-14 days'
+    }
+
+    if (formData.startDate) {
+      const startDate = new Date(formData.startDate)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      if (startDate < today) {
+        newErrors.startDate = 'Start date cannot be in the past'
+      }
     }
     
     setErrors(newErrors)
@@ -85,29 +108,67 @@ export function TripForm({ onSubmit, isLoading }: TripFormProps) {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="days" className="flex items-center gap-2">
-              <Calendar size={16} />
-              Number of Days
-            </Label>
-            <Select
-              value={formData.days.toString()}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, days: parseInt(value) }))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 14 }, (_, i) => i + 1).map(day => (
-                  <SelectItem key={day} value={day.toString()}>
-                    {day} {day === 1 ? 'day' : 'days'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.days && (
-              <p className="text-sm text-destructive">{errors.days}</p>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="days" className="flex items-center gap-2">
+                <Calendar size={16} />
+                Number of Days
+              </Label>
+              <Select
+                value={formData.days.toString()}
+                onValueChange={(value) => {
+                  const days = parseInt(value)
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    days,
+                    endDate: prev.startDate ? updateEndDate(prev.startDate, days) : ''
+                  }))
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 14 }, (_, i) => i + 1).map(day => (
+                    <SelectItem key={day} value={day.toString()}>
+                      {day} {day === 1 ? 'day' : 'days'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.days && (
+                <p className="text-sm text-destructive">{errors.days}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="startDate">
+                Start Date (Optional)
+              </Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={formData.startDate}
+                min={new Date().toISOString().split('T')[0]}
+                onChange={(e) => {
+                  const startDate = e.target.value
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    startDate,
+                    endDate: startDate ? updateEndDate(startDate, prev.days) : ''
+                  }))
+                }}
+                className={errors.startDate ? 'border-destructive' : ''}
+              />
+              {errors.startDate && (
+                <p className="text-sm text-destructive">{errors.startDate}</p>
+              )}
+              {formData.endDate && (
+                <p className="text-xs text-muted-foreground">
+                  Trip ends: {new Date(formData.endDate).toLocaleDateString()}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center justify-between p-4 border rounded-lg">
