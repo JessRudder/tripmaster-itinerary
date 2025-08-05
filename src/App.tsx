@@ -48,7 +48,9 @@ function App() {
       destination: currentItinerary.destination,
       days: currentItinerary.days,
       hasChildren: currentItinerary.hasChildren,
-      activityType: currentItinerary.activityType
+      activityType: currentItinerary.activityType,
+      startDate: currentItinerary.startDate,
+      endDate: currentItinerary.endDate
     }
     
     setIsLoading(true)
@@ -153,7 +155,10 @@ function App() {
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Calendar size={12} />
-                        {new Date(itinerary.createdAt).toLocaleDateString()}
+                        {itinerary.startDate ? 
+                          new Date(itinerary.startDate).toLocaleDateString() : 
+                          new Date(itinerary.createdAt).toLocaleDateString()
+                        }
                       </div>
                     </div>
                   ))}
