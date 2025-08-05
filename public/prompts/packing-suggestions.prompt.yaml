@@ -1,0 +1,58 @@
+name: "Generate Packing Suggestions"
+description: "Generate a comprehensive packing list for a trip based on destination, activities, weather, and traveler needs"
+
+variables:
+  - name: "days"
+    type: "number"
+    description: "Number of days for the trip"
+  - name: "destination" 
+    type: "string"
+    description: "Trip destination"
+  - name: "activitiesList"
+    type: "string"
+    description: "Comma-separated list of planned activities"
+  - name: "activityType"
+    type: "string"
+    description: "Primary activity focus (adventure, cultural, relaxation, etc.)"
+  - name: "weatherCondition"
+    type: "string"
+    description: "Expected weather conditions"
+  - name: "temperature"
+    type: "string"
+    description: "Expected temperature range"
+  - name: "hasChildren"
+    type: "boolean"
+    description: "Whether the trip includes children"
+
+prompt: |
+  You are a professional travel packing consultant. Generate a comprehensive packing list for a {{days}}-day trip to {{destination}}.
+
+  Trip details:
+  - Activities planned: {{activitiesList}}
+  - Activity focus: {{activityType}}
+  - Weather: {{weatherCondition}}, {{temperature}}
+  - Traveling with children: {{hasChildren}}
+  - Duration: {{days}} days
+
+  For each item, provide:
+  1. The specific item name
+  2. Category: clothing, gear, accessories, documents, personal, electronics
+  3. Priority: essential (absolutely must have), recommended (should have), optional (nice to have)
+  4. Brief reason why it's needed for this specific trip
+
+  Return valid JSON in this exact format:
+  {
+    "packingList": [
+      {
+        "item": "Waterproof hiking boots",
+        "category": "clothing",
+        "priority": "essential",
+        "reason": "For hiking activities and potential wet weather"
+      }
+    ]
+  }
+
+  Include 15-25 items total. Consider the specific activities, weather conditions, and destination. {{#if hasChildren}}Include child-specific items.{{/if}} Focus on practical items that match the {{activityType}} activity type.
+
+output_format: "json"
+model: "gpt-4o"

@@ -3,6 +3,8 @@ export interface TripFormData {
   days: number
   hasChildren: boolean
   activityType: ActivityType
+  startDate?: string
+  endDate?: string
 }
 
 export type ActivityType = 
@@ -13,13 +15,39 @@ export type ActivityType =
   | 'nature'
   | 'urban'
 
+export interface PhotoData {
+  url: string
+  alt: string
+  caption?: string
+  photographer?: string
+}
+
+export interface WeatherData {
+  temperature: number
+  condition: string
+  description: string
+  humidity: number
+  windSpeed: number
+  icon: string
+}
+
 export interface DayActivity {
   day: number
+  date?: string
   mainActivity: string
   description: string
   addOns: string[]
   estimatedCost?: string
   timeOfDay?: 'morning' | 'afternoon' | 'evening' | 'full-day'
+  photos?: PhotoData[]
+  weather?: WeatherData
+}
+
+export interface PackingItem {
+  item: string
+  category: 'clothing' | 'gear' | 'accessories' | 'documents' | 'personal' | 'electronics'
+  priority: 'essential' | 'recommended' | 'optional'
+  reason?: string
 }
 
 export interface TripItinerary {
@@ -30,4 +58,9 @@ export interface TripItinerary {
   activityType: ActivityType
   activities: DayActivity[]
   createdAt: string
+  startDate?: string
+  endDate?: string
+  heroPhoto?: PhotoData
+  weather?: WeatherData
+  packingList?: PackingItem[]
 }
